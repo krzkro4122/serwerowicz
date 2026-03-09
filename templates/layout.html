@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            Serwerowicz
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <script defer src="{% static 'js/main.js' %}"></script>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠</a> |
+        <a href="/about">🧑‍💻</a> |
+        <a href="/products">🍞</a>
+    </nav>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
