@@ -14,13 +14,29 @@
 </head>
 <body>
     <nav>
-        <a href="/">🏠</a> |
-        <a href="/about">🧑‍💻</a> |
-        <a href="/products">🍞</a>
+        <a href="/">
+            <span role='img' aria-label='Home' title="Home">
+                🏠
+            </span>
+        </a> |
+        <a href="/about">
+            <span role='img' aria-label='About' title="About">
+                🧑‍💻
+            </span>
+        </a> |
+        <a href="{% url 'products:list' %}">
+            <span role='img' aria-label='Products' title="Products">
+                🍞
+            </span>
+        </a> |
+        <a href="{% url 'users:register' %}">
+            <span role='img' aria-label='User registration' title="User registration">
+                👥
+            </span>
+        </a>
     </nav>
     <main>
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 </body>
 </html>

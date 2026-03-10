@@ -5,5 +5,20 @@
 {% endblock title %}
 
 {% block content %}
-    <h1>Lista produktów</h1>
+    <section>
+        <h1>Lista produktów</h1>
+
+        {% for product in products %}
+            <article>
+                <h2>
+                    <a href="{% url 'products:page' slug=product.slug %}">
+                        {{ product.title }}
+                    </a>
+                </h2>
+                <p>{{ product.date }}</p>
+                <p>{{ product.body }}</p>
+            </article>
+        {% endfor %}
+
+    </section>
 {% endblock content %}
