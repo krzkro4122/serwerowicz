@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get("DEBUG", False)
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com"
+    "django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com",
+    ".compute.internal", # This allows AWS to check if your app is healthy
 ]
 
 
@@ -43,7 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'products',
-    'users'
+    'users',
+
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -128,3 +132,25 @@ STATIC_ROOT = BASE_DIR / 'assets'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]
+
+if not DEBUG:
+    # AWS S3 Settings
+    AWS_STORAGE_BUCKET_NAME = 'serwerowicz'
+    AWS_S3_REGION_NAME = 'eu-north-1'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+    # This ensures files go into 'serwerowicz/media/...'
+    AWS_LOCATION = 'media'
+
+    # Media files (User uploads)
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    # We remove the hardcoded 'media' from the URL because AWS_LOCATION handles it
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+
+    # S3 specific performance settings
+    AWS_S3_FILE_OVERWRITE = False  # Prevents overwriting files with the same name
+    AWS_DEFAULT_ACL = None         # Uses bucket default (usually private/bucket-owner-full-control)
+else:
+    # Local storage for development
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
