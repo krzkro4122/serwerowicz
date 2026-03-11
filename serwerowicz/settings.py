@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com"]
 
 
 # Application definition
@@ -105,12 +105,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pl'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
