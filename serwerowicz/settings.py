@@ -148,7 +148,7 @@ STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
 if not DEBUG:
     # AWS S3 Settings
-    AWS_STORAGE_BUCKET_NAME = 'serwerowicz'
+    AWS_STORAGE_BUCKET_NAME = os.getenv('S3_NAME', 'serwerowicz-media')
     AWS_S3_REGION_NAME = 'eu-north-1'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
