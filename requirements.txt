@@ -2,6 +2,8 @@ asgiref==3.11.1
 astroid==4.0.4
 boto3==1.42.65
 botocore==1.42.65
+cffi==2.0.0
+cryptography==46.0.5
 dill==0.4.1
 Django==6.0.3
 django-storages==1.14.6
@@ -12,9 +14,11 @@ mccabe==0.7.0
 packaging==26.0
 pillow==12.1.1
 platformdirs==4.9.4
+pycparser==3.0
 pylint==4.0.5
 pylint-django==2.7.0
 pylint-plugin-utils==0.9.0
+PyMySQL==1.1.2
 python-dateutil==2.9.0.post0
 s3transfer==0.16.0
 six==1.17.0
