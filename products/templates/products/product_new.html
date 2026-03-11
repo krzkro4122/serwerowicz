@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register a new user
+    New product
 {% endblock title %}
 
 {% block content %}
     <section>
-        <h1>Register a new user</h1>
+        <h1>New product</h1>
         <form
-            action={% url 'users:register' %}
-            method="post"
             class="form-with-validation"
+            action="{% url 'products:new' %}"
+            method="post"
+            enctype="multipart/form-data"
         >
             {% csrf_token %}
             {{ form }}
-            <button class='form-submit'>Register</button>
+            <button class="form-submit">Add post</button>
         </form>
     </section>
 {% endblock content %}

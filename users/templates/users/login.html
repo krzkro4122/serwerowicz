@@ -1,20 +1,23 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register a new user
+    User Login
 {% endblock title %}
 
 {% block content %}
     <section>
-        <h1>Register a new user</h1>
+        <h1>User Login</h1>
         <form
-            action={% url 'users:register' %}
+            action={% url 'users:login' %}
             method="post"
             class="form-with-validation"
         >
             {% csrf_token %}
             {{ form }}
-            <button class='form-submit'>Register</button>
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next}}" />
+            {% endif %}
+            <button class='form-submit'>Login</button>
         </form>
     </section>
 {% endblock content %}
