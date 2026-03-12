@@ -1,0 +1,40 @@
+nav {
+    padding: 1rem;
+    background-color: var(--accent-color-1);
+    color: var(--foreground-color);
+    font-size: 2rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    .title-container {
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+
+        .title {
+            font-family: 'titleFont';
+        }
+    }
+
+    .product {
+        display: flex;
+        gap: 2rem;
+        flex-grow: 1;
+        justify-content: center;
+    }
+
+    .tenant-management {
+        display: flex;
+        gap: 2rem;
+    }
+
+    a {
+        text-decoration: none;
+        color: var(--foreground-color);
+    }
+
+    a:hover {
+        opacity: .85;
+    }
+}

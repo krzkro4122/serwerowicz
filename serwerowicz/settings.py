@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import socket
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,13 +27,19 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-vaq*$e6zib#mx!z^+5i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
+try:
+    internal_ip = socket.gethostbyname(socket.gethostname())
+except Exception:
+    internal_ip = None
+
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com",
-    ".compute.internal", # This allows AWS to check if your app is healthy
+    'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com', # Your EB URL
+    'localhost',
+    '127.0.0.1',
 ]
 
+if internal_ip:
+    ALLOWED_HOSTS.append(internal_ip)
 
 # Application definition
 
@@ -141,7 +148,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
-STATIC_ROOT = BASE_DIR / 'assets'
+if DEBUG:
+    STATIC_ROOT = BASE_DIR
+else:
+    STATIC_ROOT = BASE_DIR / 'assets'
+
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]
