@@ -1,12 +1,24 @@
 {% extends "layout.html" %}
+{% load static %}
 
 {% block title %}
     Produkty
 {% endblock title %}
 
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock extra_styles %}
+
 {% block content %}
     <section>
-        <h1>Lista produktów</h1>
+        <div class="header">
+            <h1>Lista produktów</h1>
+            <a class="submit-button" href="{% url 'products:new' %}">
+                <span aria-label='Dodaj Produkt' title="Dodaj Produkt">
+                    Dodaj Produkt
+                </span>
+            </a>
+        </div>
 
         {% for product in products %}
             <article>

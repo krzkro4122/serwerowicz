@@ -1,0 +1,16 @@
+.header {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    gap: 2rem;
+}
+
+.submit-button {
+    border-radius: 1rem;
+    padding: 1rem;
+    border: solid 1px black;
+}
+
+.submit-button:hover {
+    opacity: .85;
+}

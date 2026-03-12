@@ -22,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', False)
 
 try:
     internal_ip = socket.gethostbyname(socket.gethostname())
@@ -146,7 +146,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
 
 if DEBUG:
     STATIC_ROOT = BASE_DIR
@@ -159,7 +158,7 @@ STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
 if not DEBUG:
     # AWS S3 Settings
-    AWS_STORAGE_BUCKET_NAME = os.getenv('S3_NAME', 'serwerowicz-media')
+    AWS_STORAGE_BUCKET_NAME = 'serwerowicz-media'
     AWS_S3_REGION_NAME = 'eu-north-1'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
@@ -178,3 +177,4 @@ if not DEBUG:
 else:
     # Local storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = 'media/'

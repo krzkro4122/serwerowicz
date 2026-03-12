@@ -4,15 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>
         {% block title %}
             Serwerowicz
         {% endblock %}
     </title>
+
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/nav.css' %}">
     <link rel="stylesheet" href="{% static 'css/body.css' %}">
+    {% block extra_styles %}{% endblock extra_styles %}
+
     <link rel="icon" href="{% static 'image/favicon.png' %}" type="image/png">
+
     <script defer src="{% static 'js/main.js' %}"></script>
     <style>
         @font-face {
