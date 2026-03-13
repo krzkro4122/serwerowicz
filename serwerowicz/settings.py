@@ -175,19 +175,21 @@ if USE_S3:
 
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', 'serwerowicz-media')
 
-    AWS_S3_SIGNATURE_NAME = 's3v4'
-
     AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-north-1')
 
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
     AWS_S3_FILE_OVERWRITE = False  # Prevents overwriting files with the same name
 
+    # With "Bucket owner enforced" mode, ACLs are disabled
+    # Public access is controlled via bucket policy only
     AWS_DEFAULT_ACL = None  # ACLs disabled - use bucket policy for public access
 
-    AWS_S3_VERITY = True
+    # S3 signature version
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
 
-    AWS_QUERYSTRING_AUTH = False
+    # Addressing style
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
 
     STORAGES = {
         'default': {
