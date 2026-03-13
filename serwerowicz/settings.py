@@ -43,9 +43,10 @@ else:
         'krzysztofkrol.dev',
         'serwerowicz.com',
         'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com', # From your logs
+        '.eu-north-1.elasticbeanstalk.com',
         '.elasticbeanstalk.com',
-        '172.31.13.179', # Your Private IP from the logs
-        '51.21.54.161',
+        '.eu-north-1.compute.amazonaws.com.',
+        '.compute.amazonaws.com.',
     ]
 
 if internal_ip:
