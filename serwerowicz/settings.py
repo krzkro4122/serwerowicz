@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
-from pathlib import Path
 import os
 import socket
+
+from pathlib import Path
+from botocore.config import Config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,18 +26,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 try:
     internal_ip = socket.gethostbyname(socket.gethostname())
 except Exception:
     internal_ip = None
 
-ALLOWED_HOSTS = [
-    'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com', # Your EB URL
-    'localhost',
-    '127.0.0.1',
-]
+if DEBUG:
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+    ]
+else:
+    ALLOWED_HOSTS = [
+        'krzysztofkrol.dev',
+        'serwerowicz.com',
+        'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com', # From your logs
+        '.elasticbeanstalk.com',
+        '172.31.13.179', # Your Private IP from the logs
+        '51.21.54.161',
+    ]
 
 if internal_ip:
     ALLOWED_HOSTS.append(internal_ip)
@@ -156,6 +166,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
+AWS_S3_CONFIG = Config(
+    connect_timeout=5,    # Time to establish connection
+    read_timeout=10,      # Time to wait for a response
+    retries={
+        'max_attempts': 3, # Reduce from default (usually 5) to fail faster
+        'mode': 'standard'
+    }
+)
+
 if not DEBUG:
     # AWS S3 Settings
     AWS_STORAGE_BUCKET_NAME = 'serwerowicz-media'
@@ -174,6 +193,11 @@ if not DEBUG:
     # S3 specific performance settings
     AWS_S3_FILE_OVERWRITE = False  # Prevents overwriting files with the same name
     AWS_DEFAULT_ACL = None         # Uses bucket default (usually private/bucket-owner-full-control)
+
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
+
+    AWS_S3_CONFIG_OBJ = AWS_S3_CONFIG
 else:
     # Local storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -193,9 +217,11 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': log_file_path,
             'formatter': 'verbose',
+            'maxBytes': 1024,
+            'backupCount': 3,
         },
         'console': {
             'level': 'INFO',
