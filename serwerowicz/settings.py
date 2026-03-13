@@ -9,48 +9,46 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-import os
-import socket
 
+import os
 from pathlib import Path
-from botocore.config import Config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-vaq*$e6zib#mx!z^+5ijw!s_glz0g5lfcxv**mhfdm1h))4_9i')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-try:
-    internal_ip = socket.gethostbyname(socket.gethostname())
-except Exception:
-    internal_ip = None
 
+# ALLOWED_HOSTS configuration
 if DEBUG:
     ALLOWED_HOSTS = [
         'localhost',
         '127.0.0.1',
     ]
 else:
-    ALLOWED_HOSTS = [
-        'krzysztofkrol.dev',
-        'serwerowicz.com',
-        'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com',
-        '.eu-north-1.elasticbeanstalk.com',
-        '.elasticbeanstalk.com',
-        '.eu-north-1.compute.amazonaws.com.',
-        '.compute.amazonaws.com.',
-    ]
+    # Production hosts - add your domain(s) here
+    allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
+    if allowed_hosts_env:
+        ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
+    else:
+        # Default production hosts
+        ALLOWED_HOSTS = [
+            'krzysztofkrol.dev',
+            'serwerowicz.com',
+        ]
 
-if internal_ip:
-    ALLOWED_HOSTS.append(internal_ip)
+    # App Runner automatically provides a hostname, but we can also allow all
+    # if APP_RUNNER_SERVICE_URL is set, extract the hostname
+    app_runner_url = os.environ.get('APP_RUNNER_SERVICE_URL', '')
+    if app_runner_url:
+        from urllib.parse import urlparse
+        parsed = urlparse(app_runner_url)
+        if parsed.hostname:
+            ALLOWED_HOSTS.append(parsed.hostname)
+
 
 # Application definition
 
@@ -97,31 +95,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'serwerowicz.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-# Check if we are running on Beanstalk by looking for RDS variables
-if 'RDS_DB_NAME' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
-        }
-    }
-else:
-    # Local development settings
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -156,8 +129,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
 if DEBUG:
     STATIC_ROOT = BASE_DIR
 else:
@@ -167,52 +138,104 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
-AWS_S3_CONFIG = Config(
-    connect_timeout=5,    # Time to establish connection
-    read_timeout=10,      # Time to wait for a response
-    retries={
-        'max_attempts': 3, # Reduce from default (usually 5) to fail faster
-        'mode': 'standard'
-    }
-)
 
-if not DEBUG:
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+USE_RDS = os.environ.get('USE_RDS', 'False') == 'True' or not DEBUG
+
+if USE_RDS:
+    print("[DB] Using DB secrets from environment variables.")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+else:
+    print("[DB] Using a local Sqlite database")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# Allow forcing S3 usage even in DEBUG mode for testing
+USE_S3 = os.environ.get('USE_S3', 'False') == 'True' or not DEBUG
+
+if USE_S3:
     # AWS S3 Settings
-    AWS_STORAGE_BUCKET_NAME = 'serwerowicz-media'
-    AWS_S3_REGION_NAME = 'eu-north-1'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID')
+
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY')
+
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', 'serwerowicz-media')
+
+    AWS_S3_SIGNATURE_NAME = 's3v4'
+
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-north-1')
+
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-    # This ensures files go into 'serwerowicz/media/...'
-    AWS_LOCATION = 'media'
-
-    # Media files (User uploads)
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    # We remove the hardcoded 'media' from the URL because AWS_LOCATION handles it
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-
-    # S3 specific performance settings
     AWS_S3_FILE_OVERWRITE = False  # Prevents overwriting files with the same name
-    # With "Bucket owner enforced" mode, ACLs are disabled
-    # Public access is controlled via bucket policy (which is already configured)
+
     AWS_DEFAULT_ACL = None  # ACLs disabled - use bucket policy for public access
 
-    # Disable ACL-related operations since bucket owner enforced is enabled
+    AWS_S3_VERITY = True
+
+    AWS_QUERYSTRING_AUTH = False
+
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'location': 'media',
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'location': 'static',
+            },
+        }
+    }
+
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
+    # AWS_S3_ADDRESSING_STYLE = 'virtual'
+    # AWS_S3_CONFIG_OBJ = AWS_S3_CONFIG
 
-    AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_S3_ADDRESSING_STYLE = 'virtual'
-
-    AWS_S3_CONFIG_OBJ = AWS_S3_CONFIG
+    print(f"[S3] S3 storage enabled. Bucket: {AWS_STORAGE_BUCKET_NAME}")
 else:
     # Local storage for development
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+            'OPTIONS': {
+                'location': 'media',
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+            'OPTIONS': {
+                'location': 'static',
+            },
+        }
+    }
     MEDIA_URL = 'media/'
+    STATIC_URL = 'static/'
+    print("[S3] Using local file storage (DEBUG mode). Set USE_S3=True to use S3 in DEBUG mode.")
 
-log_file_path = './logs/django.log' if DEBUG else '/var/log/app-logs/django.log'
 
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -223,49 +246,50 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': log_file_path,
-            'formatter': 'verbose',
-            'maxBytes': 1024,
-            'backupCount': 3,
-        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'products': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
         'storages': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': False,
         },
         'boto3': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'WARNING',  # Reduce boto3 noise
             'propagate': False,
         },
         'botocore': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'WARNING',  # Reduce botocore noise
             'propagate': False,
         },
         's3transfer': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'serwerowicz': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },
