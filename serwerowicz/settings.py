@@ -42,7 +42,7 @@ else:
     ALLOWED_HOSTS = [
         'krzysztofkrol.dev',
         'serwerowicz.com',
-        'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com', # From your logs
+        'django-env.eba-bkztkcgc.eu-north-1.elasticbeanstalk.com',
         '.eu-north-1.elasticbeanstalk.com',
         '.elasticbeanstalk.com',
         '.eu-north-1.compute.amazonaws.com.',
@@ -193,7 +193,14 @@ if not DEBUG:
 
     # S3 specific performance settings
     AWS_S3_FILE_OVERWRITE = False  # Prevents overwriting files with the same name
-    AWS_DEFAULT_ACL = None         # Uses bucket default (usually private/bucket-owner-full-control)
+    # With "Bucket owner enforced" mode, ACLs are disabled
+    # Public access is controlled via bucket policy (which is already configured)
+    AWS_DEFAULT_ACL = None  # ACLs disabled - use bucket policy for public access
+
+    # Disable ACL-related operations since bucket owner enforced is enabled
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
 
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_ADDRESSING_STYLE = 'virtual'
@@ -211,7 +218,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{asctime}\t[{levelname}]\t{message}',
+            'format': '{asctime}\t[{levelname}]\t{name}\t{message}',
             'style': '{',
         },
     },
@@ -235,6 +242,31 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'products': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'storages': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'boto3': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'botocore': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        's3transfer': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
