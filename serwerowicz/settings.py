@@ -40,15 +40,6 @@ else:
             'serwerowicz.com',
         ]
 
-    # App Runner automatically provides a hostname, but we can also allow all
-    # if APP_RUNNER_SERVICE_URL is set, extract the hostname
-    app_runner_url = os.environ.get('APP_RUNNER_SERVICE_URL', '')
-    if app_runner_url:
-        from urllib.parse import urlparse
-        parsed = urlparse(app_runner_url)
-        if parsed.hostname:
-            ALLOWED_HOSTS.append(parsed.hostname)
-
 
 # Application definition
 
@@ -212,8 +203,6 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
-    # AWS_S3_ADDRESSING_STYLE = 'virtual'
-    # AWS_S3_CONFIG_OBJ = AWS_S3_CONFIG
 
     print(f"[S3] S3 storage enabled. Bucket: {AWS_STORAGE_BUCKET_NAME}")
 else:
