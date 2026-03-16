@@ -37,9 +37,14 @@ else:
         # Default production hosts
         ALLOWED_HOSTS = [
             'krzysztofkrol.dev',
-            'serwerowicz.com',
+            'serwerowicz.krzysztofkrol.dev',
         ]
 
+origins = ["https://serwerowicz.krzysztofkrol.dev", "https://krzysztofkrol.dev"]
+
+CSRF_TRUSTED_ORIGINS = origins
+CSRF_ALLOWED_ORIGINS = origins
+CORS_ORIGINS_WHITELIST = origins
 
 # Application definition
 
