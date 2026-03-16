@@ -39,6 +39,7 @@ else:
         ALLOWED_HOSTS = [
             'krzysztofkrol.dev',
             'serwerowicz.krzysztofkrol.dev',
+            'serwer.krzysztofkrol.dev'
         ]
     # --- DYNAMIC ADDITION FOR AWS HEALTH CHECKS ---
     try:
@@ -49,11 +50,16 @@ else:
         # Fallback in case of networking resolution issues
         pass
 
-origins = ["https://serwerowicz.krzysztofkrol.dev", "https://krzysztofkrol.dev"]
+origins = ["https://serwerowicz.krzysztofkrol.dev", "https://serwer.krzysztofkrol.dev", "https://krzysztofkrol.dev"]
 
 CSRF_TRUSTED_ORIGINS = origins
 CSRF_ALLOWED_ORIGINS = origins
 CORS_ORIGINS_WHITELIST = origins
+
+# CRITICAL for AWS ECS/ALB:
+# This tells Django to trust the 'X-Forwarded-Proto' header from the ALB
+# so it knows the connection was originally HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
