@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+import socket
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,6 +40,14 @@ else:
             'krzysztofkrol.dev',
             'serwerowicz.krzysztofkrol.dev',
         ]
+    # --- DYNAMIC ADDITION FOR AWS HEALTH CHECKS ---
+    try:
+        # This resolves the container's own internal IP address
+        container_ip = socket.gethostbyname(socket.gethostname())
+        ALLOWED_HOSTS.append(container_ip)
+    except Exception:
+        # Fallback in case of networking resolution issues
+        pass
 
 origins = ["https://serwerowicz.krzysztofkrol.dev", "https://krzysztofkrol.dev"]
 
